@@ -33,6 +33,7 @@ class ConjugateGradientDescent(GradOptimizer):
         return self.best_objective, time.time() - stime, self.best_x, self.visited_points
 
     def getBeta(self, method, d, d_prev, s):
+        y = (d - d_prev)
         if method == "default":
             beta = self.getBeta("PR", d, d_prev, s)
             beta[beta < 0] = 0.
@@ -40,10 +41,16 @@ class ConjugateGradientDescent(GradOptimizer):
         elif method == "FR":
             return ((d * d).sum(-1) / (d_prev * d_prev).sum(-1)).unsqueeze(1)
         elif method == "PR":
-            return ((d * (d - d_prev)).sum(-1) / (d_prev * d_prev).sum(-1)).unsqueeze(1)
+            return ((d * y).sum(-1) / (d_prev * d_prev).sum(-1)).unsqueeze(1)
         elif method == "HS":
-            return ((-d * (d - d_prev)).sum(-1) / (s * (d - d_prev)).sum(-1)).unsqueeze(1)
+            return ((-d * y).sum(-1) / (s * y).sum(-1)).unsqueeze(1)
         elif method == "DY":
-            return ((-d * d).sum(-1) / (s * (d - d_prev)).sum(-1)).unsqueeze(1)
+            return ((-d * d).sum(-1) / (s * y).sum(-1)).unsqueeze(1)
+        elif method == "HZ":
+            return (((y - 2 * s * (y * y).sum(-1) / (s * y).sum(-1)) * d).sum(-1) / (s * y).sum(-1)).unsqueeze(1)
+        elif method == "DL":
+            return (((y - s) * d).sum(-1) / (s * y).sum(-1)).unsqueeze(1)
+        elif method == "LS":
+            return (-(d * y).sum(-1) / (s * d_prev).sum(-1)).unsqueeze(1)
         else:
             raise NotImplementedError
