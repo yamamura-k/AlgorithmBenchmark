@@ -42,7 +42,7 @@ class ABC(BaseOptimizer):
             phi = np.random.normal()
             x_i[j] -= phi*(x_i[j] - x[k][j])
             v_new = objective(x_i.unsqueeze(0))
-            if v_new <= v[i]:
+            if (v_new <= v[i]).all():
                 x[i] = x_i
                 v[i] = v_new
             cnt[i] += 1
@@ -52,7 +52,7 @@ class ABC(BaseOptimizer):
             for i in candidate:
                 x_i = getInitialPoint((dimension, ), objective)
                 v_new = objective(x_i.unsqueeze(0))
-                if v_new <= v[i]:
+                if (v_new <= v[i]).all():
                     x[i] = x_i
                     v[i] = v_new
                     cnt[i] = 1
