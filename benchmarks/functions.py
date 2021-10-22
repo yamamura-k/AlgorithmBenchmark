@@ -89,10 +89,10 @@ class DixonPrice(BaseFunction):
         self.bounds = bounds
         if self.bounds is None:
             self.bounds = (-10, 10)
-        self._seq = torch.arange(2, self.n)
+        self._seq = torch.arange(2, self.n + 1).unsqueeze(-1)
 
     def __call__(self, x):
-        return ((x[0]-1).pow(2).sum(dim=-1) + (self._seq * (2*x[1:].pow(2) - x[:-1]).pow(2)).sum(dim=-1)).unsqueeze(-1)
+        return ((x[:, 0]-1).pow(2) + (self._seq * (2*x[:, 1:].pow(2) - x[:, :-1]).pow(2)).sum(dim=-1)).unsqueeze(-1)
 
 class Griewank(BaseFunction):
     def __init__(self, n=2, minimum=0, bounds=None) -> None:

@@ -28,7 +28,7 @@ class FA(BaseOptimizer):
                 x[i] += (beta*torch.exp(-gamma*norm).unsqueeze(0) * better_x +
                             alpha*(rand-0.5)).sum(dim=0)
                 assert (x[torch.where(I < I[i])[0]] != better_x).all()
-                I[i] = objective(x[i])
+                I[i] = objective(x[i].unsqueeze(0))
             self.gather_info(I, x)
 
         return self.best_objective, time.time() - s, self.best_x, self.visited_points

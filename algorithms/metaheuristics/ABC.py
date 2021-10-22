@@ -41,7 +41,7 @@ class ABC(BaseOptimizer):
             k = np.random.randint(0, num_population-1)
             phi = np.random.normal()
             x_i[j] -= phi*(x_i[j] - x[k][j])
-            v_new = objective(x_i)
+            v_new = objective(x_i.unsqueeze(0))
             if v_new <= v[i]:
                 x[i] = x_i
                 v[i] = v_new
@@ -51,7 +51,7 @@ class ABC(BaseOptimizer):
             candidate = torch.where(cnt == max_visit)[0]
             for i in candidate:
                 x_i = getInitialPoint((dimension, ), objective)
-                v_new = objective(x_i)
+                v_new = objective(x_i.unsqueeze(0))
                 if v_new <= v[i]:
                     x[i] = x_i
                     v[i] = v_new
