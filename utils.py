@@ -4,7 +4,7 @@ import torch
 def getInitialPoint(shape, objective, initialize_method="random", *args, **kwargs):
     if initialize_method == "random":
         try:
-            points = torch.from_numpy(np.random.uniform(*objective.boundaries, size=shape))
+            points = torch.from_numpy(np.random.uniform(*objective.bounds, size=shape))
         except AttributeError:
             points = torch.from_numpy(np.random.random(size=shape))
     else:

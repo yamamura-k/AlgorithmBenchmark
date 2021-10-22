@@ -1,5 +1,7 @@
 import torch
 from math import pi
+import numpy as np
+import matplotlib.pyplot as plt
 """
 `https://pytorch.org/docs/stable/autograd.html`
 関数はクラスで定義して、`forward`と(`backward`)を定義する
@@ -10,6 +12,9 @@ from math import pi
 class BaseFunction(object):
     def __init__(self) -> None:
         super().__init__()
+        self.n = None
+        self.minimum = None
+        self.bounds = None
     
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
@@ -19,6 +24,47 @@ class BaseFunction(object):
             x = x.detach().requires_grad_(True)
             self(x).sum().backward()
         return x.grad.detach().clone()
+    
+    def heatmap(self, points=None):
+        assert self.n == 2, f"Cannot visualize {self.n} dimensional data by 2D heatmap."
+        data = np.linspace(self.bounds[0], self.bounds[1], 50)
+        X, Y = np.meshgrid(data, data)
+        fig, ax = plt.subplots()
+        heatmap = ax.pcolor(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0)).squeeze(), cmap="jet", shading="auto")
+        fig.colorbar(heatmap)
+        if points is not None:
+            for _points in points:
+                ax.scatter(_points[:, 0], _points[:, 1], marker="o")
+                break
+        return fig, ax
+    
+    def plot2D(self, points=None):
+        assert self.n == 2, f"Cannot visualize {self.n} dimensional data by 3D heatmap."
+        data = np.linspace(self.bounds[0], self.bounds[1], 50)
+        X, Y = np.meshgrid(data, data)
+        fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+        surface = ax.plot_surface(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0)).squeeze().numpy(), alpha=0.3, cmap="jet")
+        fig.colorbar(surface)
+        if points is not None:
+            for _points in points:
+                ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")
+                break
+        return fig, ax
+
+    def heatmap3D(self, points=None):
+        assert self.n == 3, f"Cannot visualize {self.n} dimensional data by 3D heatmap."
+        data = np.linspace(self.bounds[0], self.bounds[1], 50)
+        X, Y, Z = np.meshgrid(data, data, data)
+        fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+        # sc = ax.plot_surface(X, Y, Z, c=self(torch.from_numpy(np.stack([X, Y, Z])).permute(1, 2, 3, 0)).squeeze(), alpha=0.3, cmap="jet")
+        sc = ax.scatter(X, Y, Z, c=self(torch.from_numpy(np.stack([X, Y, Z])).permute(1, 2, 3, 0)).squeeze(), alpha=0.3, cmap="jet")
+        fig.colorbar(sc)
+        if points is not None:
+            for _points in points:
+                ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")
+                break
+        return fig, ax
+
 
 class Ackley(BaseFunction):
     def __init__(self, n=2, minimum=0, bounds=None) -> None:
