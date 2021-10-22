@@ -7,6 +7,8 @@ from .functions import (
     Schwefel22, Step, StyblinskiTang,
     Trid, Sphere
 )
+import torch
+import os
 
 class Benchmark(object):
     def __init__(self, n=2) -> None:
@@ -50,15 +52,23 @@ class Benchmark(object):
                     )
                 self.results[target][algo].append((objective, compute_time, solution, visited_points))
     
-    def summary(self, label="objective"):
+    def summary(self, label="objective", root_dir="./result/picture"):
         """
         共通：計算時間順にソート、目的関数値順にソート、アルゴリズムごとの統計情報算出
         低次元：結果の可視化
         """
+        os.makedirs(root_dir, exist_ok=True)
         for target in self.target_functions:
             print(target)
             for algo in self.results[target]:
                 if label == "objective":
                     print(algo, self.results[target][algo][0][0].item())
+                elif label == "2Dplot":
+                    points = torch.stack(self.results[target][algo][0][-1])
+                    self.target_functions[target].heatmap(points=points)[0].savefig(f"{root_dir}/heatmap_{target}_{algo}.png")
+                    self.target_functions[target].plot2D(points=points)[0].savefig(f"{root_dir}/3Dplot_{target}_{algo}.png")
+                elif label == "3Dheatmap":
+                    points = torch.stack(self.results[target][algo][0][-1])
+                    self.target_functions[target].heatmap3D(points=points)[0].savefig(f"{root_dir}/heatmap3D_{target}_{algo}.png")
                 else:
                     raise NotImplementedError
