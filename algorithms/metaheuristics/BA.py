@@ -14,6 +14,7 @@ class BA(BaseOptimizer):
 
     def __call__(self, dimension, objective, max_iter, num_population=100, f_min=0,
                  f_max=100, selection_max=10, alpha=0.9, gamma=0.9, *args, **kwargs):
+        self.init_params()
         s = time.time()
         x = getInitialPoint((num_population, dimension), objective)
         v = torch.from_numpy(np.random.random((num_population, dimension)))

@@ -13,6 +13,7 @@ class GWO(BaseOptimizer):
         super().__init__()
 
     def __call__(self, dimension, objective, max_iter, num_population=100, top_k=3, *args, **kwargs):
+        self.init_params()
         s = time.time()
         x = getInitialPoint((num_population, dimension), objective)
         objectives = objective(x)

@@ -10,6 +10,7 @@ class Newton(GradOptimizer):
         super().__init__()
 
     def __call__(self, dimension, objective, eps=1e-10, n_start=10, *args, **kwargs):
+        self.init_params()
         s = time.time()
         x = getInitialPoint((n_start, dimension,), objective)
         nab = objective.grad(x).detach()

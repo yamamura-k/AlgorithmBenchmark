@@ -12,6 +12,7 @@ class TLBO(BaseOptimizer):
         super().__init__()
 
     def __call__(self, dimension, objective, max_iter, num_population=100, *args, **kwargs):
+        self.init_params()
         s = time.time()
         x = getInitialPoint((num_population, dimension), objective)
         obj_vals = objective(x)
