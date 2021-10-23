@@ -80,3 +80,9 @@ class Benchmark(object):
                     self.target_functions[target].heatmap3D(points=points, gif_title=f"{root_dir}/heatmap3D_{target}_{algo}.gif")
                 else:
                     raise NotImplementedError
+
+    def reset(self):
+        self.results = {
+            target_name : defaultdict(list)
+            for target_name in self.target_functions
+        }
