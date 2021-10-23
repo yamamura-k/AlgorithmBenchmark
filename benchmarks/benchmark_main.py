@@ -67,16 +67,16 @@ class Benchmark(object):
                     print(algo, result[0])
                     if self.n == 2:
                         points = torch.stack(result[-1])
-                        self.target_functions[target].heatmap(points=points, gif_title=f"{root_dir}heatmap_{target}_{algo}_{i}.gif")[0].savefig(f"{root_dir}/heatmap_{target}_{algo}_{i}.png")
-                        self.target_functions[target].plot2D(points=points, gif_title=f"{root_dir}3Dplot_{target}_{algo}_{i}.gif")[0].savefig(f"{root_dir}/3Dplot_{target}_{algo}_{i}.png")
+                        self.target_functions[target].heatmap(points=points, gif_title=f"{root_dir}heatmap_{target}_{algo}_{i}.gif")
+                        self.target_functions[target].plot2D(points=points, gif_title=f"{root_dir}3Dplot_{target}_{algo}_{i}.gif")
                 if label == "objective":
                     print(algo, self.results[target][algo][0][0])
                 elif label == "2Dplot" and self.n == 2:
                     points = torch.stack(self.results[target][algo][0][-1])
-                    self.target_functions[target].heatmap(points=points)[0].savefig(f"{root_dir}/heatmap_{target}_{algo}.png")
-                    self.target_functions[target].plot2D(points=points)[0].savefig(f"{root_dir}/3Dplot_{target}_{algo}.png")
+                    self.target_functions[target].heatmap(points=points, gif_title=f"{root_dir}heatmap_{target}_{algo}_{i}.gif")
+                    self.target_functions[target].plot2D(points=points, gif_title=f"{root_dir}3Dplot_{target}_{algo}_{i}.gif")
                 elif label == "3Dheatmap" and self.n == 3:
                     points = torch.stack(self.results[target][algo][0][-1])
-                    self.target_functions[target].heatmap3D(points=points)[0].savefig(f"{root_dir}/heatmap3D_{target}_{algo}.png")
+                    self.target_functions[target].heatmap3D(points=points, gif_title=f"{root_dir}/heatmap3D_{target}_{algo}.gif")
                 else:
                     raise NotImplementedError
