@@ -31,6 +31,7 @@ def main():
         algorithm_args = {algo : algorithm_arg for algo in algorithms}
         benchmark.run(algorithms, algorithm_args)
         benchmark.summary(root_dir=f"./result/picture/{beta}")
+        benchmark.reset()
 
 if __name__=='__main__':
     main()
