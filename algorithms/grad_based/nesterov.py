@@ -18,6 +18,7 @@ class NesterovAcceralation(GradOptimizer):
 
         d_prev = -objective.grad(x).detach()
         self.gather_info(objective(x), x)
+        alpha = step
         for t in range(max_iter):
             y_nx = x + d_prev*alpha
             x = y_nx + gam*(y_nx - y)
