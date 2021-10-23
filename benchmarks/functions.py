@@ -39,7 +39,8 @@ class BaseFunction(object):
                 artists += [[heatmap, ax.scatter(_points[:, 0], _points[:, 1], marker="o")]]
             ani = ArtistAnimation(fig, artists)
             ani.save(gif_title)
-        return fig, ax
+        plt.clf()
+        plt.close()
     
     def plot2D(self, points=None, gif_title="tmp2D.gif"):
         assert self.n == 2, f"Cannot visualize {self.n} dimensional data by 3D heatmap."
@@ -54,7 +55,8 @@ class BaseFunction(object):
                 artists += [[surface, ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")]]
             ani = ArtistAnimation(fig, artists)
             ani.save(gif_title)
-        return fig, ax
+        plt.clf()
+        plt.close()
 
     def heatmap3D(self, points=None, gif_title="tmp_3D.gif"):
         assert self.n == 3, f"Cannot visualize {self.n} dimensional data by 3D heatmap."
@@ -70,7 +72,8 @@ class BaseFunction(object):
                 artists += [[sc, ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")]]
             ani = ArtistAnimation(fig, artists)
             ani.save(gif_title)
-        return fig, ax
+        plt.clf()
+        plt.close()
 
 
 class Ackley(BaseFunction):
