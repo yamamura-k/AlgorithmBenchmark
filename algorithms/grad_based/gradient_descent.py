@@ -17,7 +17,7 @@ class GradientDescent(GradOptimizer):
         for t in range(max_iter):
             alpha = self.getStep(x, objective.grad(x).detach(), objective,
                             step=step, method=method, *args, **kwargs)
-            d = objective.grad(x).detach()
+            d = -objective.grad(x).detach()
             x += alpha*d
             self.gather_info(objective(x), x)
         
