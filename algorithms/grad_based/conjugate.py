@@ -15,6 +15,7 @@ class ConjugateGradientDescent(GradOptimizer):
         super().__init__()
 
     def __call__(self, dimension, objective, max_iter, n_start=10, method="armijo", beta_method="default", *args, **kwargs):
+        self.init_params()
         stime = time.time()
         x = getInitialPoint((n_start, dimension,), objective)
         d = -objective.grad(x).detach()
@@ -47,7 +48,7 @@ class ConjugateGradientDescent(GradOptimizer):
         elif method == "DY":
             return ((-d * d).sum(-1) / (s * y).sum(-1)).unsqueeze(1)
         elif method == "HZ":
-            return (((y - 2 * s * (y * y).sum(-1) / (s * y).sum(-1)) * d).sum(-1) / (s * y).sum(-1)).unsqueeze(1)
+            return ((y - 2 * (s * (y * y).sum(-1).unsqueeze(1) / (s * y).sum(-1).unsqueeze(1))) * d).sum(-1).unsqueeze(1) / (s * y).sum(-1).unsqueeze(1)
         elif method == "DL":
             return (((y - s) * d).sum(-1) / (s * y).sum(-1)).unsqueeze(1)
         elif method == "LS":

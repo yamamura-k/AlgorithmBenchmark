@@ -25,13 +25,14 @@ class ABC(BaseOptimizer):
         super().__init__()
 
     def __call__(self, dimension, objective, max_iter, max_visit=10, num_population=100, *args, **kwargs):
+        self.init_params()
         s = time.time()
         # step1 : initialization
         x = getInitialPoint((num_population, dimension), objective)
         all_candidates = torch.arange(num_population)
         v = objective(x)
         cnt = torch.zeros(num_population)
-        m = v.min()
+        m = v.min().item()
 
         self.gather_info(v, x, m)
 
@@ -43,8 +44,8 @@ class ABC(BaseOptimizer):
             x_i[j] -= phi*(x_i[j] - x[k][j])
             v_new = objective(x_i.unsqueeze(0))
             if (v_new <= v[i]).all():
-                x[i] = x_i
-                v[i] = v_new
+                x[i] = x_i.view(x[i].shape)
+                v[i] = v_new.view(v[i].shape)
             cnt[i] += 1
     
         def random_update():
@@ -53,8 +54,8 @@ class ABC(BaseOptimizer):
                 x_i = getInitialPoint((dimension, ), objective)
                 v_new = objective(x_i.unsqueeze(0))
                 if (v_new <= v[i]).all():
-                    x[i] = x_i
-                    v[i] = v_new
+                    x[i] = x_i.view(x[i].shape)
+                    v[i] = v_new.view(v[i].shape)
                     cnt[i] = 1
     
         for _ in range(1, max_iter+1):
@@ -78,7 +79,7 @@ class ABC(BaseOptimizer):
     
                 # scouts
                 random_update()
-            m = v.min()
+            m = v.min().item()
             self.gather_info(v, x, m)
     
         return self.best_objective, time.time() - s, self.best_x, self.visited_points

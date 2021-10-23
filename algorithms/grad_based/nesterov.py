@@ -8,6 +8,7 @@ class NesterovAcceralation(GradOptimizer):
         super().__init__()
 
     def __call__(self, dimension, objective, max_iter, step=1e-4, method="armijo", n_start=10, *args, **kwargs):
+        self.init_params()
         s = time.time()
         x = getInitialPoint((n_start, dimension,), objective)
         lam = 1
@@ -31,6 +32,4 @@ class NesterovAcceralation(GradOptimizer):
                             d, objective, step=step, method=method, *args, **kwargs)
             d_prev = d
             self.gather_info(objective(x), x)
-            if (alpha == 0).all():
-                break
         return self.best_objective, time.time() - s, self.best_x, self.visited_points

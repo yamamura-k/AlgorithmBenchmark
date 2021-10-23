@@ -9,6 +9,12 @@ class BaseOptimizer(object):
         self.best_x = None
         self.visited_points = []
         self.computation_time = None
+    
+    def init_params(self):
+        self.best_objective = INF
+        self.best_x = None
+        self.visited_points = []
+        self.computation_time = None
 
     @abstractmethod
     def __call__(self, *args, **kwargs):
@@ -16,7 +22,7 @@ class BaseOptimizer(object):
 
     def gather_info(self, objectives, current_points, current_best=None):
         if current_best is None:
-            current_best = objectives.min()
+            current_best = objectives.min().clone().item()
         if current_best < self.best_objective:
             index, _ = torch.where(objectives == current_best)
             self.best_objective = current_best

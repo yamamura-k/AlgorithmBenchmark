@@ -19,11 +19,18 @@ def main():
     benchmark = Benchmark(n=n)
     algorithm_arg = dict(
         dimension=n,
-        max_iter=500,
+        max_iter=100,
+        method="static",
+        step=0.001
     )
-    algorithm_args = {algo : algorithm_arg for algo in algorithms}
-    benchmark.run(algorithms, algorithm_args)
-    benchmark.summary()
+    beta_methods = ["default", "FR","PR","HS","DY","HZ","DL","LS"]
+    for beta in beta_methods:
+        algorithm_arg["beta_method"] = beta
+        algorithm_args = {algo : algorithm_arg for algo in algorithms}
+        benchmark.run(algorithms, algorithm_args)
+        benchmark.summary()
 
 if __name__=='__main__':
+    import torch
+    torch.set_num_threads(2)
     main()

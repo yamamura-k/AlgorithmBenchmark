@@ -14,6 +14,7 @@ class FA(BaseOptimizer):
 
     def __call__(self, dimension, objective, max_iter,
                  num_population=100, beta=1, gamma=1, alpha=0.2, *args, **kwargs):
+        self.init_params()
         s = time.time()
         x = getInitialPoint((num_population, dimension), objective)
         I = objective(x)

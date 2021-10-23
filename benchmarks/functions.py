@@ -30,7 +30,7 @@ class BaseFunction(object):
         data = np.linspace(self.bounds[0], self.bounds[1], 50)
         X, Y = np.meshgrid(data, data)
         fig, ax = plt.subplots()
-        heatmap = ax.pcolor(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0)).squeeze(), cmap="jet", shading="auto")
+        heatmap = ax.pcolor(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0).view(-1, self.n)).squeeze().view(50, 50), cmap="jet", shading="auto")
         fig.colorbar(heatmap)
         if points is not None:
             for _points in points:
@@ -43,7 +43,7 @@ class BaseFunction(object):
         data = np.linspace(self.bounds[0], self.bounds[1], 50)
         X, Y = np.meshgrid(data, data)
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-        surface = ax.plot_surface(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0)).squeeze().numpy(), alpha=0.3, cmap="jet")
+        surface = ax.plot_surface(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0).view(-1, self.n)).squeeze().view(50, 50).numpy(), alpha=0.3, cmap="jet")
         fig.colorbar(surface)
         if points is not None:
             for _points in points:
@@ -57,7 +57,7 @@ class BaseFunction(object):
         X, Y, Z = np.meshgrid(data, data, data)
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
         # sc = ax.plot_surface(X, Y, Z, c=self(torch.from_numpy(np.stack([X, Y, Z])).permute(1, 2, 3, 0)).squeeze(), alpha=0.3, cmap="jet")
-        sc = ax.scatter(X, Y, Z, c=self(torch.from_numpy(np.stack([X, Y, Z])).permute(1, 2, 3, 0)).squeeze(), alpha=0.3, cmap="jet")
+        sc = ax.scatter(X, Y, Z, c=self(torch.from_numpy(np.stack([X, Y, Z])).permute(1, 2, 3, 0).view(-1, self.n)).squeeze().view(50, 50, 50), alpha=0.3, cmap="jet")
         fig.colorbar(sc)
         if points is not None:
             for _points in points:
@@ -200,7 +200,7 @@ class Rosenbrock(BaseFunction):
             self.bounds = (-5, 10)
     
     def __call__(self, x):
-        return (100 * (x[1:] - x[:-1].pow(2)).pow(2) + (x[:-1]-1).pow(2)).mean(dim=-1).unsqueeze(-1)
+        return (100 * (x[:, 1:] - x[:, :-1].pow(2)).pow(2) + (x[:, :-1]-1).pow(2)).mean(dim=-1).unsqueeze(-1)
 
 class Schwefel21(BaseFunction):
     def __init__(self, n=2, minimum=0, bounds=None) -> None:
@@ -212,7 +212,7 @@ class Schwefel21(BaseFunction):
             self.bounds = (-100, 100)
     
     def __call__(self, x):
-        return x.abs().max(dim=-1).unsqueeze(-1)
+        return x.abs().max(dim=-1)[0].unsqueeze(-1)
 
 class Schwefel22(BaseFunction):
     def __init__(self, n=2, minimum=0, bounds=None) -> None:
@@ -264,7 +264,7 @@ class Trid(BaseFunction):
             self.bounds = (-pow(n, 2), pow(n, 2))
     
     def __call__(self, x):
-        return ((x - 1).pow(2).sum(dim=-1) - x[1:]*x[:-1].sum(dim=-1)).unsqueeze(-1)
+        return ((x - 1).pow(2).sum(dim=-1) - (x[:, 1:]*x[:, :-1]).sum(dim=-1)).unsqueeze(-1)
 
 class Sphere(BaseFunction):
     def __init__(self, n=2, minimum=0, bounds=None) -> None:
