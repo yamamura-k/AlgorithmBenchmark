@@ -14,7 +14,7 @@ class NesterovAcceralation(GradOptimizer):
         lam = 1
         lam_nx = None
         gam = -1
-        y = x.clone()
+        y = x.detach().clone()
 
         d_prev = -objective.grad(x).detach()
         self.gather_info(objective(x), x)
@@ -30,6 +30,6 @@ class NesterovAcceralation(GradOptimizer):
 
             alpha = self.getStep((1+gam)*x - gam*y, (1+gam) *
                             d, objective, step=step, method=method, *args, **kwargs)
-            d_prev = d
+            d_prev = d.detach().clone()
             self.gather_info(objective(x), x)
         return self.best_objective, time.time() - s, self.best_x, self.visited_points

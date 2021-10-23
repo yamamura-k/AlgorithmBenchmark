@@ -2,6 +2,7 @@ import torch
 from math import pi
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import ArtistAnimation
 """
 `https://pytorch.org/docs/stable/autograd.html`
 関数はクラスで定義して、`forward`と(`backward`)を定義する
@@ -25,7 +26,7 @@ class BaseFunction(object):
             self(x).sum().backward()
         return x.grad.detach().clone()
     
-    def heatmap(self, points=None):
+    def heatmap(self, points=None, gif_title="tmp_heatmap.gif"):
         assert self.n == 2, f"Cannot visualize {self.n} dimensional data by 2D heatmap."
         data = np.linspace(self.bounds[0], self.bounds[1], 50)
         X, Y = np.meshgrid(data, data)
@@ -33,12 +34,14 @@ class BaseFunction(object):
         heatmap = ax.pcolor(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0).view(-1, self.n)).squeeze().view(50, 50), cmap="jet", shading="auto")
         fig.colorbar(heatmap)
         if points is not None:
+            artists = []
             for _points in points:
-                ax.scatter(_points[:, 0], _points[:, 1], marker="o")
-                break
+                artists += [[heatmap, ax.scatter(_points[:, 0], _points[:, 1], marker="o")]]
+            ani = ArtistAnimation(fig, artists)
+            ani.save(gif_title)
         return fig, ax
     
-    def plot2D(self, points=None):
+    def plot2D(self, points=None, gif_title="tmp2D.gif"):
         assert self.n == 2, f"Cannot visualize {self.n} dimensional data by 3D heatmap."
         data = np.linspace(self.bounds[0], self.bounds[1], 50)
         X, Y = np.meshgrid(data, data)
@@ -46,12 +49,14 @@ class BaseFunction(object):
         surface = ax.plot_surface(X, Y, self(torch.from_numpy(np.stack([X, Y])).permute(1, 2, 0).view(-1, self.n)).squeeze().view(50, 50).numpy(), alpha=0.3, cmap="jet")
         fig.colorbar(surface)
         if points is not None:
+            artists = []
             for _points in points:
-                ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")
-                break
+                artists += [[surface, ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")]]
+            ani = ArtistAnimation(fig, artists)
+            ani.save(gif_title)
         return fig, ax
 
-    def heatmap3D(self, points=None):
+    def heatmap3D(self, points=None, gif_title="tmp_3D.gif"):
         assert self.n == 3, f"Cannot visualize {self.n} dimensional data by 3D heatmap."
         data = np.linspace(self.bounds[0], self.bounds[1], 50)
         X, Y, Z = np.meshgrid(data, data, data)
@@ -60,9 +65,11 @@ class BaseFunction(object):
         sc = ax.scatter(X, Y, Z, c=self(torch.from_numpy(np.stack([X, Y, Z])).permute(1, 2, 3, 0).view(-1, self.n)).squeeze().view(50, 50, 50), alpha=0.3, cmap="jet")
         fig.colorbar(sc)
         if points is not None:
+            artists = []
             for _points in points:
-                ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")
-                break
+                artists += [[sc, ax.scatter(_points[:, 0], _points[:, 1], self(_points).squeeze(), marker="o")]]
+            ani = ArtistAnimation(fig, artists)
+            ani.save(gif_title)
         return fig, ax
 
 

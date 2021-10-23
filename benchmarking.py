@@ -8,8 +8,11 @@ from algorithms.grad_based import (
 )
 def main():
     algorithms = dict(
-        ABC=ABC(), BA=BA(), FA=FA(),
-        GWO=GWO(), TLBO=TLBO(),
+        ABC=ABC(),
+        BA=BA(),
+        FA=FA(),
+        GWO=GWO(),
+        TLBO=TLBO(),
         GradientDescent=GradientDescent(),
         ConjugateGradientDescent=ConjugateGradientDescent(),
         NesterovAcceralation=NesterovAcceralation(),
@@ -20,8 +23,6 @@ def main():
     algorithm_arg = dict(
         dimension=n,
         max_iter=100,
-        method="static",
-        step=0.001
     )
     beta_methods = ["default", "FR","PR","HS","DY","HZ","DL","LS"]
     for beta in beta_methods:

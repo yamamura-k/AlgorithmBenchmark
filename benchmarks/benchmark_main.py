@@ -14,6 +14,7 @@ from tqdm import tqdm
 class Benchmark(object):
     def __init__(self, n=2) -> None:
         super().__init__()
+        self.n = n
         function_args = dict(
             n=n
         )
@@ -64,16 +65,17 @@ class Benchmark(object):
             for algo in self.results[target]:
                 for i, result in enumerate(self.results[target][algo]):
                     print(algo, result[0])
-                    points = torch.stack(result[-1])
-                    self.target_functions[target].heatmap(points=points)[0].savefig(f"{root_dir}/heatmap_{target}_{algo}_{i}.png")
-                    self.target_functions[target].plot2D(points=points)[0].savefig(f"{root_dir}/3Dplot_{target}_{algo}_{i}.png")
+                    if self.n == 2:
+                        points = torch.stack(result[-1])
+                        self.target_functions[target].heatmap(points=points, gif_title=f"{root_dir}heatmap_{target}_{algo}_{i}.gif")[0].savefig(f"{root_dir}/heatmap_{target}_{algo}_{i}.png")
+                        self.target_functions[target].plot2D(points=points, gif_title=f"{root_dir}3Dplot_{target}_{algo}_{i}.gif")[0].savefig(f"{root_dir}/3Dplot_{target}_{algo}_{i}.png")
                 if label == "objective":
                     print(algo, self.results[target][algo][0][0])
-                elif label == "2Dplot":
+                elif label == "2Dplot" and self.n == 2:
                     points = torch.stack(self.results[target][algo][0][-1])
                     self.target_functions[target].heatmap(points=points)[0].savefig(f"{root_dir}/heatmap_{target}_{algo}.png")
                     self.target_functions[target].plot2D(points=points)[0].savefig(f"{root_dir}/3Dplot_{target}_{algo}.png")
-                elif label == "3Dheatmap":
+                elif label == "3Dheatmap" and self.n == 3:
                     points = torch.stack(self.results[target][algo][0][-1])
                     self.target_functions[target].heatmap3D(points=points)[0].savefig(f"{root_dir}/heatmap3D_{target}_{algo}.png")
                 else:

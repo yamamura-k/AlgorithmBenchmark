@@ -26,8 +26,8 @@ class BaseOptimizer(object):
         if current_best < self.best_objective:
             index, _ = torch.where(objectives == current_best)
             self.best_objective = current_best
-            self.best_x = current_points[index].clone()
-        self.visited_points.append(current_points)
+            self.best_x = current_points[index].detach().clone()
+        self.visited_points.append(current_points.detach().clone())
 
 class GradOptimizer(BaseOptimizer):
     def __init__(self) -> None:

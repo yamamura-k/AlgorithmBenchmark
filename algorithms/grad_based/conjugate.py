@@ -19,8 +19,8 @@ class ConjugateGradientDescent(GradOptimizer):
         stime = time.time()
         x = getInitialPoint((n_start, dimension,), objective)
         d = -objective.grad(x).detach()
-        d_prev = d
-        s = d
+        d_prev = d.detach().clone()
+        s = d.detach().clone()
         alpha = self.getStep(x, s, objective, method=method, *args, **kwargs)
         self.gather_info(objective(x), x)
         for t in range(max_iter):
@@ -29,7 +29,7 @@ class ConjugateGradientDescent(GradOptimizer):
             beta = self.getBeta(beta_method, d, d_prev, s)
             s = beta*s + d
             alpha = self.getStep(x, s, objective, method=method, *args, **kwargs)
-            d_prev = d
+            d_prev = d.detach().clone()
             self.gather_info(objective(x), x)
         return self.best_objective, time.time() - stime, self.best_x, self.visited_points
 
