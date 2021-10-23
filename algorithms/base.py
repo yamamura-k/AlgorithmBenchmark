@@ -48,7 +48,8 @@ class GradOptimizer(BaseOptimizer):
         a = torch.full_like(f, 0)
         b = torch.full_like(f, INF)
         phi_dif0 = (nab*d).sum(-1).unsqueeze(1)
-        assert (phi_dif0 <= 0).any()
+        if (phi_dif0 > 0).all():
+            return torch.zeros_like(f)
         prev_alpha = _alpha.clone()
         while True:
             phi = objective(x+_alpha*d)
@@ -56,7 +57,7 @@ class GradOptimizer(BaseOptimizer):
             condition1 = phi > f + c1 * _alpha * phi_dif0
             condition2 = phi_dif < c2 * phi_dif0
             b[condition1] = _alpha[condition1]
-            a[~condition1 & condition2] = alpha[~condition1 & condition2]
+            a[~condition1 & condition2] = _alpha[~condition1 & condition2]
             if (~condition1 & ~condition2).all():
                 return _alpha
             condition3 = b < INF
