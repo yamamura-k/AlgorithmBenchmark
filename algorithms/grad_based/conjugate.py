@@ -15,21 +15,23 @@ class ConjugateGradientDescent(GradOptimizer):
     def __init__(self) -> None:
         super().__init__()
 
-    def __call__(self, dimension, objective, max_iter, n_start=10, method="armijo", beta_method="default", proj=identity, *args, **kwargs):
+    def __call__(self, dimension, objective, max_iter, n_start=10, method="armijo",
+                beta_method="default", proj=identity, grad_proj=identity, *args, **kwargs):
         self.init_params()
         stime = time.time()
         x = getInitialPoint((n_start, dimension,), objective)
         d = -objective.grad(x).detach()
         d_prev = d.detach().clone()
-        s = proj(d.detach().clone())
+        s = grad_proj(d.detach().clone())
         alpha = self.getStep(x, s, objective, method=method, *args, **kwargs)
         self.gather_info(objective(x), x)
         for t in range(max_iter):
             x += alpha*s
+            x = proj(x)
             d = -objective.grad(x).detach()
             beta = self.getBeta(beta_method, d, d_prev, s)
-            s = proj(beta*s + d)
-            alpha = self.getStep(x, s, objective, method=method, *args, **kwargs)
+            s = grad_proj(beta*s + d)
+            alpha = self.getStep(x, s, objective, method=method, proj=proj, *args, **kwargs)
             d_prev = d.detach().clone()
             self.gather_info(objective(x), x)
         return self.best_objective, time.time() - stime, self.best_x, self.visited_points

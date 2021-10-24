@@ -1,6 +1,8 @@
 from abc import abstractmethod
 import torch
 
+from projection import identity
+
 INF = float('inf')
 class BaseOptimizer(object):
     def __init__(self) -> None:
@@ -41,7 +43,7 @@ class GradOptimizer(BaseOptimizer):
         elif method == "wolfe":
             return self._wolfe(x, d, objective, *args, **kwargs)
 
-    def _wolfe(self, x, d, objective, c1=1e-5, c2=1-1e-5, alpha=10, *args, **kwargs):
+    def _wolfe(self, x, d, objective, c1=1e-5, c2=1-1e-5, alpha=10, proj=identity, *args, **kwargs):
         nab = objective.grad(x)
         f = objective(x)
         _alpha = torch.full_like(f, alpha)
@@ -52,8 +54,8 @@ class GradOptimizer(BaseOptimizer):
             return torch.zeros_like(f)
         prev_alpha = _alpha.clone()
         while True:
-            phi = objective(x+_alpha*d)
-            phi_dif = (objective.grad(x+_alpha*d) * d).sum(-1).unsqueeze(1)
+            phi = objective(proj(x+_alpha*d))
+            phi_dif = (objective.grad(proj(x+_alpha*d)) * d).sum(-1).unsqueeze(1)
             condition1 = phi > f + c1 * _alpha * phi_dif0
             condition2 = phi_dif < c2 * phi_dif0
             b[condition1] = _alpha[condition1]
@@ -68,7 +70,7 @@ class GradOptimizer(BaseOptimizer):
             _alpha[~condition3] = 2*a[~condition3]
             prev_alpha = _alpha.clone()
     
-    def _armijo(self, x, d, objective, c1=0.5, alpha=10, rho=0.9, *args, **kwargs):
+    def _armijo(self, x, d, objective, c1=0.5, alpha=10, rho=0.9, proj=identity, *args, **kwargs):
         nab = objective.grad(x)
         f = objective(x)
         _alpha = torch.full_like(f, alpha)
@@ -76,7 +78,7 @@ class GradOptimizer(BaseOptimizer):
         if (phi_dif0 >= 0).all():
             return torch.zeros_like(f)
         while True:
-            phi = objective(x+_alpha*d)
+            phi = objective(proj(x+_alpha*d))
             condition = (phi > f + c1*_alpha*phi_dif0)
             _alpha[condition] *= rho
             if (~condition).all():

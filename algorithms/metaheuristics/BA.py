@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from projection import identity
 from utils import getInitialPoint
 from algorithms.base import BaseOptimizer, INF
 import time
@@ -13,7 +14,7 @@ class BA(BaseOptimizer):
         super().__init__()
 
     def __call__(self, dimension, objective, max_iter, num_population=100, f_min=0,
-                 f_max=100, selection_max=10, alpha=0.9, gamma=0.9, *args, **kwargs):
+                 f_max=100, selection_max=10, alpha=0.9, gamma=0.9, proj=identity, *args, **kwargs):
         self.init_params()
         s = time.time()
         x = getInitialPoint((num_population, dimension), objective)
@@ -31,6 +32,7 @@ class BA(BaseOptimizer):
                     0, 1, size=num_population), (dimension, num_population)).T
             v += (x - self.best_x) * f
             x_t = x + v
+            x_t = proj(x_t)
             obj_t = objective(x_t)
             obj_new = torch.full(size=(num_population, 1), fill_value=INF, dtype=torch.double)
     
@@ -39,6 +41,7 @@ class BA(BaseOptimizer):
             idx = np.random.randint(0, selection_max, size=(len(idxs[0]),))
             eps = torch.from_numpy(np.random.uniform(-1, 1, size=(len(idxs[0]),))).unsqueeze(0).T
             x_new[idxs] = x[idx] + eps * A.mean()
+            x_new = proj(x_new)
             obj_new[idxs] = objective(x_new[idxs])
     
             x_random = getInitialPoint((num_population, dimension), objective)

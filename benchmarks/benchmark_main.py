@@ -11,6 +11,7 @@ import torch
 import os
 from tqdm import tqdm
 
+
 class Benchmark(object):
     def __init__(self, n=2) -> None:
         super().__init__()
@@ -38,51 +39,58 @@ class Benchmark(object):
             Sphere=Sphere(**function_args)
         )
         self.results = {
-            target_name : defaultdict(list)
+            target_name: defaultdict(list)
             for target_name in self.target_functions
         }
-    
-    def run(self, algorithms : dict, algorithm_args : dict = None):
+
+    def run(self, algorithms: dict, algorithm_args: dict = None):
         if algorithm_args is None:
             algorithm_args = dict()
         for target in tqdm(self.target_functions):
             for algo in tqdm(algorithms):
+                if "proj" in algorithm_args[algo]:
+                    algorithm_args[algo]["proj"].upper = self.target_functions[target].bounds[1]
+                    algorithm_args[algo]["proj"].lower = self.target_functions[target].bounds[0]
                 objective, compute_time,\
-                solution, visited_points = algorithms[algo](
-                    objective=self.target_functions[target],
-                    **algorithm_args[algo]
+                    solution, visited_points = algorithms[algo](
+                        objective=self.target_functions[target],
+                        **algorithm_args[algo]
                     )
-                self.results[target][algo].append((objective, compute_time, solution, visited_points))
-    
+                self.results[target][algo].append(
+                    (objective, compute_time, solution, visited_points))
+
     def summary(self, label="objective", root_dir="./result/picture"):
         """
         共通：計算時間順にソート、目的関数値順にソート、アルゴリズムごとの統計情報算出
         低次元：結果の可視化
         """
         os.makedirs(root_dir, exist_ok=True)
-        for target in self.target_functions:
-            print(target)
+        for target in tqdm(self.target_functions):
+            print(target, self.target_functions[target].minimum)
             for algo in self.results[target]:
                 for i, result in enumerate(self.results[target][algo]):
-                    print(algo, result[0])
+                    print(algo, result[0], result[1])
                     if self.n == 2:
+                        os.makedirs(root_dir + f"/{algo}", exist_ok=True)
                         points = torch.stack(result[-1])
-                        self.target_functions[target].heatmap(points=points, gif_title=f"{root_dir}/heatmap_{target}_{algo}_{i}.gif")
-                        self.target_functions[target].plot2D(points=points, gif_title=f"{root_dir}/3Dplot_{target}_{algo}_{i}.gif")
-                if label == "objective":
-                    print(algo, self.results[target][algo][0][0])
-                elif label == "2Dplot" and self.n == 2:
-                    points = torch.stack(self.results[target][algo][0][-1])
-                    self.target_functions[target].heatmap(points=points, gif_title=f"{root_dir}/heatmap_{target}_{algo}_{i}.gif")
-                    self.target_functions[target].plot2D(points=points, gif_title=f"{root_dir}/3Dplot_{target}_{algo}_{i}.gif")
-                elif label == "3Dheatmap" and self.n == 3:
-                    points = torch.stack(self.results[target][algo][0][-1])
-                    self.target_functions[target].heatmap3D(points=points, gif_title=f"{root_dir}/heatmap3D_{target}_{algo}.gif")
-                else:
-                    raise NotImplementedError
+                        self.target_functions[target].heatmap(
+                            points=points, gif_title=f"{root_dir}/{algo}/heatmap_{target}_{algo}_{i}.gif")
+                        self.target_functions[target].plot2D(
+                            points=points, gif_title=f"{root_dir}/{algo}/3Dplot_{target}_{algo}_{i}.gif")
+                # if label == "objective":
+                #     print(algo, self.results[target][algo][0][0])
+                # elif label == "2Dplot" and self.n == 2:
+                #     points = torch.stack(self.results[target][algo][0][-1])
+                #     self.target_functions[target].heatmap(points=points, gif_title=f"{root_dir}/heatmap_{target}_{algo}_{i}.gif")
+                #     self.target_functions[target].plot2D(points=points, gif_title=f"{root_dir}/3Dplot_{target}_{algo}_{i}.gif")
+                # elif label == "3Dheatmap" and self.n == 3:
+                #     points = torch.stack(self.results[target][algo][0][-1])
+                #     self.target_functions[target].heatmap3D(points=points, gif_title=f"{root_dir}/heatmap3D_{target}_{algo}.gif")
+                # else:
+                #     raise NotImplementedError
 
     def reset(self):
         self.results = {
-            target_name : defaultdict(list)
+            target_name: defaultdict(list)
             for target_name in self.target_functions
         }

@@ -14,7 +14,7 @@ class Newton(GradOptimizer):
         s = time.time()
         x = getInitialPoint((n_start, dimension,), objective)
         nab = objective.grad(x).detach()
-        H_inv = torch.linalg.pinv(hessian(objective(x), x).detach())
+        H_inv = torch.linalg.pinv(objective.hesse(x).detach())
         lam = nab.T@H_inv@nab
         d = -H_inv@nab
         self.gather_info(objective(x), x)
@@ -22,7 +22,7 @@ class Newton(GradOptimizer):
         while lam > eps:
             x = x + d
             nab = objective.grad(x).detach()
-            H_inv = torch.linalg.pinv(hessian(objective(x), x).detach())
+            H_inv = torch.linalg.pinv(objective.hesse(x).detach())
             lam = nab.T@H_inv@nab
             d = -H_inv@nab
             t += 1

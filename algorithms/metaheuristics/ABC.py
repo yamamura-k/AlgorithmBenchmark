@@ -7,6 +7,7 @@ import torch
 import numpy as np
 import time
 from algorithms.base import BaseOptimizer
+from projection import identity
 from utils import getInitialPoint
 torch.random.manual_seed(0)
 np.random.seed(0)
@@ -24,7 +25,8 @@ class ABC(BaseOptimizer):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
-    def __call__(self, dimension, objective, max_iter, max_visit=10, num_population=100, *args, **kwargs):
+    def __call__(self, dimension, objective, max_iter, max_visit=10,
+                num_population=100, proj=identity, *args, **kwargs):
         self.init_params()
         s = time.time()
         # step1 : initialization
@@ -42,7 +44,9 @@ class ABC(BaseOptimizer):
             k = np.random.randint(0, num_population-1)
             phi = np.random.normal()
             x_i[j] -= phi*(x_i[j] - x[k][j])
-            v_new = objective(x_i.unsqueeze(0))
+            x_i = x_i.unsqueeze(0)
+            x_i = proj(x_i)
+            v_new = objective(x_i)
             if (v_new <= v[i]).all():
                 x[i] = x_i.view(x[i].shape)
                 v[i] = v_new.view(v[i].shape)
@@ -51,8 +55,8 @@ class ABC(BaseOptimizer):
         def random_update():
             candidate = torch.where(cnt == max_visit)[0]
             for i in candidate:
-                x_i = getInitialPoint((dimension, ), objective)
-                v_new = objective(x_i.unsqueeze(0))
+                x_i = getInitialPoint((1, dimension), objective)
+                v_new = objective(x_i)
                 if (v_new <= v[i]).all():
                     x[i] = x_i.view(x[i].shape)
                     v[i] = v_new.view(v[i].shape)
