@@ -25,6 +25,16 @@ class BaseFunction(object):
             x = x.detach().requires_grad_(True)
             self(x).sum().backward()
         return x.grad.detach().clone()
+
+    def hesse(self, x):
+        with torch.enable_grad():
+            x = x.detach().requires_grad_(True)
+            g = torch.autograd.grad(self(x).sum(), x, create_graph=True)
+            h = 0
+            for _g in g:
+                h += _g
+            h.backward()
+        return x.grad.detach().clone()
     
     def heatmap(self, points=None, gif_title="tmp_heatmap.gif"):
         assert self.n == 2, f"Cannot visualize {self.n} dimensional data by 2D heatmap."

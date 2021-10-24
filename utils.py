@@ -34,9 +34,9 @@ def preprocess(C, inequalities):
     for i, eq in inequalities:
         if eq == 0:
             continue
-        add_vec = np.zeros(shape=(n, 1))
+        add_vec = torch.zeros(size=(n, 1))
         add_vec[i] = eq
-        C = np.hstack(C, add_vec, )
+        C = torch.stack([C, add_vec])
     return C
 """考えるべきこと
 ランク落ちしている場合の処理
